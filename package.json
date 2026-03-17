@@ -1,0 +1,28 @@
+{
+  "name": "2020-12-15-image-cropper",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@tailwindcss/aspect-ratio": "^0.2.0",
+    "autoprefixer": "^10.1.0",
+    "framer-motion": "^3.3.0-beta.22",
+    "next": "^12.3.7",
+    "postcss": "^8.2.1",
+    "react": "17.0.1",
+    "react-dom": "17.0.1",
+    "react-use-gesture": "^9.0.2",
+    "tailwindcss": "^2.0.2"
+  },
+  "engines": {
+    "node": ">=12"
+  },
+  "devDependencies": {
+    "eslint": "^7.15.0",
+    "eslint-plugin-react": "^7.21.5"
+  }
+}
