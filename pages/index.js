@@ -4,25 +4,47 @@ import { useGesture } from "react-use-gesture";
 
 export default function Home() {
   let [crop, setCrop] = useState({ x: 0, y: 0, scale: 1 });
+  const [calc, setCalc] = useState({
+    x: 0,
+    B: 0,
+    extra: 0,
+    sqrt: 0,
+    result: 0,
+  });
 
   return (
     <>
-      <p className="mt-2 text-lg text-center">Image Cropper</p>
-
-      <div className="p-8 mt-2">
-        <ImageCropper src="/thumb.jpg" crop={crop} onCropChange={setCrop} />
-
+      <p className="mt-4 text-lg text-center">Muhammad Ahmed (B23110006082)</p>
+      <div className="p-8">
+        <div>
+          <ImageCropper src="/thumb.jpg" crop={crop} onCropChange={setCrop} onCalcChange={setCalc} />
+        </div>
         <div className="mt-6">
           <p>Crop X: {Math.round(crop.x)}</p>
           <p>Crop Y: {Math.round(crop.y)}</p>
           <p>Crop Scale: {Math.round(crop.scale * 100) / 100}</p>
+          <div className="mt-4 text-sm">
+          {/* <div className="mt-4 text-sm rounded">
+            <p className="font-semibold">Live Rubber Band Explanation:</p>
+            <p className="mt-1 italic ">
+              Formula: b = B + sign(x − B) · 2√|x − B|
+            </p>
+            <p>
+              x (drag) = {calc.x.toFixed(2)} → you dragged {calc.x.toFixed(2)}px past the boundary
+            </p>
+            <p>B (boundary) = {calc.B.toFixed(2)} → the limit of your container</p>
+            <p>extra = {calc.extra.toFixed(2)} → distance beyond boundary</p>
+            <p>√extra = {calc.sqrt.toFixed(2)} → square root of extra to reduce sensitivity at large distances</p>
+            <p>b (result) = {calc.result.toFixed(2)} → actual UI movement applied</p>
+          </div> */}
+          </div>
         </div>
       </div>
     </>
   );
 }
 
-function ImageCropper({ src, crop, onCropChange }) {
+function ImageCropper({ src, crop, onCropChange,  onCalcChange }) {
   let x = useMotionValue(crop.x);
   let y = useMotionValue(crop.y);
   let scale = useMotionValue(crop.scale);
@@ -50,8 +72,8 @@ function ImageCropper({ src, crop, onCropChange }) {
         let minY =
           -(imageBounds.height - containerBounds.height) + heightOverhang;
 
-        x.set(dampen(dx, [minX, maxX]));
-        y.set(dampen(dy, [minY, maxY]));
+        x.set(dampen(dx, [minX, maxX], onCalcChange));
+        y.set(dampen(dy, [minY, maxY], onCalcChange));
       },
 
       onPinch: ({
@@ -181,16 +203,37 @@ function ImageCropper({ src, crop, onCropChange }) {
   );
 }
 
-function dampen(val, [min, max]) {
+function dampen(val, [min, max], report) {
+  let B, extra, sqrt, result;
+
   if (val > max) {
-    let extra = val - max;
-    let dampenedExtra = extra > 0 ? Math.sqrt(extra) : -Math.sqrt(-extra);
-    return max + dampenedExtra * 2;
+    B = max;
+    extra = val - B;
+    sqrt = Math.sqrt(extra);
+    result = B + sqrt * 2;
+
   } else if (val < min) {
-    let extra = val - min;
-    let dampenedExtra = extra > 0 ? Math.sqrt(extra) : -Math.sqrt(-extra);
-    return min + dampenedExtra * 2;
+    B = min;
+    extra = val - B;
+    sqrt = -Math.sqrt(-extra);
+    result = B + sqrt * 2;
+
   } else {
-    return val;
+    B = val;
+    extra = 0;
+    sqrt = 0;
+    result = val;
   }
+
+  if (report) {
+    report({
+      x: val,
+      B,
+      extra,
+      sqrt,
+      result,
+    });
+  }
+
+  return result;
 }
