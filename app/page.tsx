@@ -1,6 +1,29 @@
+'use client'
+
 import { animate, motion, useMotionValue } from "framer-motion";
 import { useRef, useState } from "react";
 import { useGesture } from "react-use-gesture";
+
+interface CropState {
+  x: number;
+  y: number;
+  scale: number;
+}
+
+interface CalcState {
+  x: number;
+  B: number;
+  extra: number;
+  sqrt: number;
+  result: number;
+}
+
+interface ImageCropperProps {
+  src: string;
+  crop: CropState;
+  onCropChange: (crop: CropState) => void;
+  onCalcChange: (calc: CalcState) => void;
+}
 
 export default function Home() {
   let [crop, setCrop] = useState({ x: 0, y: 0, scale: 1 });
@@ -15,7 +38,7 @@ export default function Home() {
   return (
     <>
       <p className="mt-4 text-lg text-center">Muhammad Ahmed (B23110006082)</p>
-      <div className="p-8">
+      <div className="p-8 flex flex-col items-center">
         <div>
           <ImageCropper src="/thumb.jpg" crop={crop} onCropChange={setCrop} onCalcChange={setCalc} />
         </div>
@@ -24,19 +47,6 @@ export default function Home() {
           <p>Crop Y: {Math.round(crop.y)}</p>
           <p>Crop Scale: {Math.round(crop.scale * 100) / 100}</p>
           <div className="mt-4 text-sm">
-          {/* <div className="mt-4 text-sm rounded">
-            <p className="font-semibold">Live Rubber Band Explanation:</p>
-            <p className="mt-1 italic ">
-              Formula: b = B + sign(x − B) · 2√|x − B|
-            </p>
-            <p>
-              x (drag) = {calc.x.toFixed(2)} → you dragged {calc.x.toFixed(2)}px past the boundary
-            </p>
-            <p>B (boundary) = {calc.B.toFixed(2)} → the limit of your container</p>
-            <p>extra = {calc.extra.toFixed(2)} → distance beyond boundary</p>
-            <p>√extra = {calc.sqrt.toFixed(2)} → square root of extra to reduce sensitivity at large distances</p>
-            <p>b (result) = {calc.result.toFixed(2)} → actual UI movement applied</p>
-          </div> */}
           </div>
         </div>
       </div>
@@ -44,15 +54,15 @@ export default function Home() {
   );
 }
 
-function ImageCropper({ src, crop, onCropChange,  onCalcChange }) {
+function ImageCropper({ src, crop, onCropChange, onCalcChange }: ImageCropperProps) {
   let x = useMotionValue(crop.x);
   let y = useMotionValue(crop.y);
   let scale = useMotionValue(crop.scale);
   let [isDragging, setIsDragging] = useState(false);
   let [isPinching, setIsPinching] = useState(false);
 
-  let imageRef = useRef();
-  let imageContainerRef = useRef();
+  let imageRef = useRef<HTMLImageElement>(null);
+  let imageContainerRef = useRef<HTMLDivElement>(null);
   useGesture(
     {
       onDrag: ({ dragging, movement: [dx, dy] }) => {
@@ -60,6 +70,7 @@ function ImageCropper({ src, crop, onCropChange,  onCalcChange }) {
         x.stop();
         y.stop();
 
+        if (!imageRef.current || !imageContainerRef.current) return;
         let imageBounds = imageRef.current.getBoundingClientRect();
         let containerBounds = imageContainerRef.current.getBoundingClientRect();
         let originalWidth = imageRef.current.clientWidth;
@@ -88,6 +99,7 @@ function ImageCropper({ src, crop, onCropChange,  onCalcChange }) {
         x.stop();
         y.stop();
 
+        if (!imageRef.current || !imageContainerRef.current) return memo;
         memo ??= {
           bounds: imageRef.current.getBoundingClientRect(),
           crop: { x: x.get(), y: y.get(), scale: scale.get() },
@@ -125,6 +137,7 @@ function ImageCropper({ src, crop, onCropChange,  onCalcChange }) {
   );
 
   function maybeAdjustImage() {
+    if (!imageRef.current || !imageContainerRef.current) return;
     let newCrop = { x: x.get(), y: y.get(), scale: scale.get() };
     let imageBounds = imageRef.current.getBoundingClientRect();
     let containerBounds = imageContainerRef.current.getBoundingClientRect();
@@ -162,11 +175,11 @@ function ImageCropper({ src, crop, onCropChange,  onCalcChange }) {
   return (
     <>
       <div
-        className={`relative overflow-hidden bg-black ring-4 ${
+        className={`relative overflow-hidden bg-black ring-4 w-80 h-96 ${
           isDragging ? "cursor-grabbing" : "cursor-grab"
-        } ring-white aspect-w-4 aspect-h-5`}
+        } ring-white`}
       >
-        <div ref={imageContainerRef}>
+        <div ref={imageContainerRef} className="absolute inset-0">
           <motion.img
             src={src}
             ref={imageRef}
@@ -203,7 +216,7 @@ function ImageCropper({ src, crop, onCropChange,  onCalcChange }) {
   );
 }
 
-function dampen(val, [min, max], report) {
+function dampen(val: number, [min, max]: [number, number], report: (calc: CalcState) => void) {
   let B, extra, sqrt, result;
 
   if (val > max) {

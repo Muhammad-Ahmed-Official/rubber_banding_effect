@@ -1,8 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install:*)",
-      "Bash(timeout 15 npm run dev)"
+      "Bash(npm run:*)",
+      "Bash(cmd /c \"taskkill /PID 22196 /F\")",
+      "Bash(cmd /c \"taskkill /IM node.exe /F\")"
     ]
   }
 }
