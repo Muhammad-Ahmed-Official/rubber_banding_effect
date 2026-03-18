@@ -49,6 +49,9 @@ export default function Home() {
           <div className="mt-4 text-sm">
           </div>
         </div>
+        <div>
+When the user drags the image along the x-axis, it moves freely within the crop area until it reaches its boundary. The maximum it can move is about −363 px on the x-axis; beyond this limit the image cannot move normally. If the user continues dragging past −363 px, a rubber-band effect is applied, so the image still shifts slightly but with strong resistance. The further it is pulled, the smaller the movement becomes, providing elastic feedback that the horizontal boundary has been reached. When the user releases the mouse, the image smoothly snaps back to the nearest valid position inside the container, ensuring the image remains visible.
+        </div>
       </div>
     </>
   );
