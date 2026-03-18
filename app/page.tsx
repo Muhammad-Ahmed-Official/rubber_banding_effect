@@ -1,7 +1,7 @@
 'use client'
 
 import { animate, motion, useMotionValue } from "framer-motion";
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { useGesture } from "react-use-gesture";
 
 interface CropState {
@@ -131,7 +131,7 @@ function ImageCropper({ src, crop, onCropChange, onCalcChange }: ImageCropperPro
       pinch: {
         distanceBounds: { min: 0 },
       },
-      domTarget: imageRef,
+      domTarget: imageRef as React.RefObject<EventTarget>,
       eventOptions: { passive: false },
     }
   );
@@ -190,8 +190,8 @@ function ImageCropper({ src, crop, onCropChange, onCalcChange }: ImageCropperPro
               touchAction: "none",
               userSelect: "none",
               MozUserSelect: "none",
-              WebkitUserDrag: "none",
             }}
+            draggable={false}
             className="relative w-auto h-full max-w-none max-h-none"
           />
           <div

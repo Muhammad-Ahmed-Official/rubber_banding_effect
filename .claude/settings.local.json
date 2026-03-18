@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npm run:*)",
       "Bash(cmd /c \"taskkill /PID 22196 /F\")",
-      "Bash(cmd /c \"taskkill /IM node.exe /F\")"
+      "Bash(cmd /c \"taskkill /IM node.exe /F\")",
+      "Bash(npx tsc:*)"
     ]
   }
 }
